@@ -84,6 +84,11 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap'
 }).addTo(map);
 
+map.on("moveend", () => {
+  const center = map.getCenter();
+  loadFeeds(center.lat, center.lng);
+});
+
 let marker;
 
 function useLocation() {
