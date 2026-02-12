@@ -13,10 +13,6 @@
   href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 />
 
-<button onclick="toggleTheme()">🌙 Toggle Theme</button>
-
-
-
 <style>
 body {
   margin:0;
@@ -24,15 +20,6 @@ body {
   background:#0f172a;
   color:white;
 }
-
-body.light {
-  background:#f1f5f9;
-  color:#111;
-}
-body.light .feed {
-  background:#e2e8f0;
-}
-  
 header {
   padding:15px;
   text-align:center;
@@ -45,7 +32,6 @@ header {
   padding:15px;
   text-align:center;
 }
-  
 button, select {
   padding:10px;
   margin:5px;
@@ -70,8 +56,6 @@ audio {
 </style>
 </head>
 
-
-  
 <body>
 
 <header>
@@ -99,23 +83,6 @@ let map = L.map('map').setView([39.5, -98.35], 4);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap'
 }).addTo(map);
-
-map.on("moveend", () => {
-  const center = map.getCenter();
-  loadFeeds(center.lat, center.lng);
-});
-
-function toggleTheme() {
-  const current = document.body.classList.toggle("light");
-  localStorage.setItem("theme", current ? "light" : "dark");
-}
-
-window.onload = () => {
-  if (localStorage.getItem("theme") === "light") {
-    document.body.classList.add("light");
-  }
-};
-
 
 let marker;
 
@@ -151,17 +118,6 @@ async function loadFeeds(lat, lon) {
     `;
   });
 }
-
-async function fetchMetadata(streamUrl) {
-  try {
-    const res = await fetch(`/api/metadata?url=${encodeURIComponent(streamUrl)}`);
-    const data = await res.json();
-    return data.title || "Live Broadcast";
-  } catch {
-    return "Live Broadcast";
-  }
-}
-
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
