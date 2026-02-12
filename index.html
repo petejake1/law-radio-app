@@ -124,6 +124,17 @@ async function loadFeeds(lat, lon) {
   });
 }
 
+async function fetchMetadata(streamUrl) {
+  try {
+    const res = await fetch(`/api/metadata?url=${encodeURIComponent(streamUrl)}`);
+    const data = await res.json();
+    return data.title || "Live Broadcast";
+  } catch {
+    return "Live Broadcast";
+  }
+}
+
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
 }
