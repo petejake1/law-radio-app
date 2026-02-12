@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Law Radio Finder</title>
+
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#0f172a"/>
+
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+body {
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#0f172a;
+  color:white;
+}
+header {
+  padding:15px;
+  text-align:center;
+  background:#1e293b;
+}
+#map {
+  height:300px;
+}
+.controls {
+  padding:15px;
+  text-align:center;
+}
+button, select {
+  padding:10px;
+  margin:5px;
+  border:none;
+  border-radius:6px;
+}
+button {
+  background:#3b82f6;
+  color:white;
+  cursor:pointer;
+}
+.feed {
+  background:#1e293b;
+  padding:10px;
+  margin:10px;
+  border-radius:8px;
+}
+audio {
+  width:100%;
+  margin-top:8px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>Live Law Enforcement Radio</h2>
+</header>
+
+<div id="map"></div>
+
+<div class="controls">
+  <button onclick="useLocation()">Use My Location</button>
+  <select id="agencyFilter">
+    <option value="police">Police</option>
+    <option value="sheriff">Sheriff</option>
+    <option value="state patrol">State Patrol</option>
+  </select>
+</div>
+
+<div id="feeds"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+let map = L.map('map').setView([39.5, -98.35], 4);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap'
+}).addTo(map);
+
+let marker;
+
+function useLocation() {
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+
+    map.setView([lat, lon], 10);
+
+    if (marker) map.removeLayer(marker);
+    marker = L.marker([lat, lon]).addTo(map);
+
+    loadFeeds(lat, lon);
+  });
+}
+
+async function loadFeeds(lat, lon) {
+  const filter = document.getElementById("agencyFilter").value;
+  const res = await fetch(`/api/feeds?lat=${lat}&lon=${lon}&type=${filter}`);
+  const data = await res.json();
+
+  const container = document.getElementById("feeds");
+  container.innerHTML = "";
+
+  data.feeds.forEach(feed => {
+    container.innerHTML += `
+      <div class="feed">
+        <strong>${feed.name}</strong><br/>
+        ${feed.location}<br/>
+        <audio controls src="${feed.stream}"></audio>
+      </div>
+    `;
+  });
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
+</script>
+
+</body>
+</html>
