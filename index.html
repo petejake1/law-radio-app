@@ -94,6 +94,18 @@ map.on("moveend", () => {
   loadFeeds(center.lat, center.lng);
 });
 
+function toggleTheme() {
+  const current = document.body.classList.toggle("light");
+  localStorage.setItem("theme", current ? "light" : "dark");
+}
+
+window.onload = () => {
+  if (localStorage.getItem("theme") === "light") {
+    document.body.classList.add("light");
+  }
+};
+
+
 let marker;
 
 function useLocation() {
